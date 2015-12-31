@@ -5,7 +5,6 @@ Swiss Tournament Application implements the Swiss tournament system supporting m
 ## Table of contents
 
 * [Quick start](#quick-start)
-* [Motivation](#motivation)
 * [Documentation](#documentation)
 * [Contributors](#contributors)
 * [License](#license)
@@ -28,25 +27,24 @@ The steps to quick start are:
 	- ``vagrant ssh`` to log in
 3. Go to the project folder:
 	- ``cd /vagrant/Swiss-tournament``
-5. Create the database
-	sudo -u postgres psql -c "CREATE DATABASE TOURNAMENT"
+5. Create the database:
+	``sudo -u postgres psql -c "CREATE DATABASE TOURNAMENT"``
 6. Create tables, views, triggers. Run these in command prompt:
 	- ``psql tournament`` to connect database in console
 	- ``\i tournament.sql`` Implement database schema creation
 7. From the root `/Swiss-tournament` directory, run `python tournament_test.py` in the command line
 
 #### To verify code:
-- Look at ```tournament.sql`` to check SQL database setup
-- Look at ```tournament.py`` to check implementation of the Swiss-pairing tournament
-- Look at ```tournament_test.py`` to tests the implementation. 
+- Look at ``tournament.sql`` to check SQL database setup
+- Look at ``tournament.py`` to check implementation of the Swiss-pairing tournament
+- Look at ``tournament_test.py`` to tests the implementation. 
 
 #### Running extended implementation
-- In way to test multi-players and multi-tournaments of this implementation, use the method testTournamentMultiPlayers() inside tournament_test.py to run with many competitors and run again to test new tournament.
+- In way to test multi-players and multi-tournaments of this implementation, use the method ``testTournamentMultiPlayers()`` inside the main of ``tournament_test.py`` to run with many competitors and run again to test new tournament.
 
+## Documentation
 
-## Motivation
-
-This project is the first creation of the Nanodegree program, with aim of improving skills of full stack development.
+To see all database information (schema, tables, relation, etc) and the components, modules implemented, check DOCUMENTATION.md
 
 
 ## Contributors
