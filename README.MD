@@ -44,7 +44,7 @@ The steps to quick start are:
 
 ## Documentation
 
-To see all database information (schema, tables, relation, etc) and the components, modules implemented, check (DOCUMENTATION.md)
+To see all database information (schema, tables, relation, etc) and the components, modules implemented, check [DOCUMENTATION.MD](#DOCUMENTATION.md)
 
 
 ## Contributors
