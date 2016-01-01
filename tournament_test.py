@@ -137,7 +137,7 @@ def testTournamentMultiPlayers():
     start_time = time.time()    
     print "Number of competitors [",conn_tournmt._competitors,"]"
     for i in range(conn_tournmt._competitors):
-        # register players randomly using the module names     
+        # register players' name randomly using the module names     
         conn_tournmt.registerPlayer(names.get_full_name())
     testRandomInit()
     while id_round <=conn_tournmt._total_rounds:
@@ -173,10 +173,11 @@ if __name__ == '__main__':
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
     data=[1234,'Tournament swissPairings','Mexico city','2015-12-01',
           '205-12-30',17]
+    # Udacity test nanodegree program      
     conn_tournmt=tournament.TournamentSwissDb()
     conn_tournmt.connect()
     conn_tournmt.setTournamentInfo(data)
-    '''testDeleteMatches()
+    testDeleteMatches()
     testDelete()
     testCount()
     testRegister()
@@ -184,9 +185,10 @@ if __name__ == '__main__':
     testRandomInit()
     testStandingsBeforeMatches()
     reportMatches()
-    testPairings()'''
+    testPairings()
     
-    testTournamentMultiPlayers()    
+    # Test extended implementation (multi-players and multi-tournaments)
+    #testTournamentMultiPlayers()
     
     print "Success!  All tests pass!"
 
