@@ -80,4 +80,55 @@ Indexes:
  tournament_id | integer | 
 ```
 
+### Aditional Packages
+This implementation is supported by the following packages. Click on it to see further details
+    - [psycopg2](http://initd.org/psycopg/docs): Postgres database library
+    - [names](https://pypi.python.org/pypi/names): Package index to generate random names
+
+### Reference of building this app
+To build this app, it was based on information from different components, such as:
+postgres, collections, lists, etc. 
+
+Reference of using COALESCE (sql function)
+http://www.lawebdelprogramador.com/foros/PostgreSQL/547420-Equivalencia-de-NVL-de-Oracle.html
+
+Reference of using left outer join (sql sentence)
+http://www.postgresql.org/docs/8.3/static/tutorial-join.html
+
+Pasing parameters in python programming postgres
+http://initd.org/psycopg/docs/usage.html#query-parameters
+http://stackoverflow.com/questions/9075349/using-insert-with-a-postgresql-database-using-python
+http://stackoverflow.com/questions/4113910/python-psycogp2-inserting-into-postgresql-help
+http://initd.org/psycopg/docs/usage.html#query-parameters
+
+Reference of using namedtuple
+https://docs.python.org/2/library/collections.html#module-collections    
+
+Reference of using random
+http://stackoverflow.com/questions/976882/shuffling-a-list-of-objects-in-python
+http://www.pythonforbeginners.com/random/how-to-use-the-random-module-in-python
+
+Reference of programming python
+https://docs.python.org/2/tutorial/
+http://www.tutorialspoint.com/python/python_variable_types.htm
+https://docs.python.org/2/library/index.html
+
+Reference of using random names
+https://pypi.python.org/pypi/names/
+https://github.com/treyhunner/names
+
+Reference of using list
+http://stackoverflow.com/questions/627435/how-to-remove-an-element-from-a-list-by-index-in-python
+
+Reference of using itertools
+https://docs.python.org/2/library/itertools.html
+
+
+
+
+
+
+
+
+
 

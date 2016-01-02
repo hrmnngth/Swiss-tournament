@@ -19,8 +19,6 @@ Swiss Tournament Application implements the Swiss tournament system supporting m
 	- psycopg2: ``sudo apt-get install python-psycopg2`` Postgres database library 
 	- [names](https://pypi.python.org/pypi/names): Package index to generate random names 
 
-sudo apt-get install python-names
-
 ## Quick start
 
 The steps to quick start are:
