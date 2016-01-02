@@ -15,7 +15,7 @@ Swiss Tournament Application implements the Swiss tournament system supporting m
 1. This project works with vagrant machine that includes the follow components. Make sure you have installed vagrant properly at the same level of 'repo folder'
 	- python2.7
 	- PostgresSQL
-2.- Install the follow components in vagrant machine
+2. Install the follow components in vagrant machine
 	- psycopg2: ``sudo apt-get install python-psycopg2`` Postgres database library 
 	- [names](https://pypi.python.org/pypi/names): Package index to generate random names 
 
@@ -27,7 +27,7 @@ The steps to quick start are:
 
 * [Download the zip file in your directory](https://github.com/hrmnngth/Swiss-tournament/archive/master.zip).
 * or Clone the repo: `git clone https://github.com/hrmnngth/Swiss-tournament.git`.
-* check out the [Requeriments](#requeriments) to run the app
+* Check out the [Requeriments](#requeriments) to run the app
 
 #### Running the app
 
@@ -53,7 +53,7 @@ The steps to quick start are:
 
 ## Documentation
 
-To see all database information (schema, tables, relation, etc) and the components, modules implemented, check [DOCUMENTATION.MD](#DOCUMENTATION.md)
+To see all database information (schema, tables, relation, etc) and the components, modules implemented, check [DOCUMENTATION.MD](https://github.com/hrmnngth/Swiss-tournament/blob/master/DOCUMENTATION.md)
 
 
 ## Contributors

@@ -1,6 +1,7 @@
 ## Database scheme:
 ### Tables:
-Table "public.players"
+- Table "public.players"
+```
        Column       |  Type   | Modifiers 
 --------------------+---------+-----------
  player_id          | integer | not null
@@ -13,8 +14,9 @@ Indexes:
     "players_pkey" PRIMARY KEY, btree (player_id)
 Triggers:
     playertournament AFTER INSERT OR UPDATE ON players FOR EACH ROW EXECUTE PROCEDURE regplayertournament()
-
-Table "public.player_standings"
+```
+- Table "public.player_standings"
+```
     Column     |  Type   | Modifiers 
 ---------------+---------+-----------
  player_id     | integer | 
@@ -26,8 +28,9 @@ Table "public.player_standings"
  tournament_id | integer | 
  Indexes:
     "player_standings_pkey" PRIMARY KEY, btree (player_id, tournament_id)
-
-Table "public.matches"
+```
+- Table "public.matches"
+```
     Column     |            Type             | Modifiers 
 ---------------+-----------------------------+-----------
  tournament_id | integer                     | 
@@ -37,8 +40,8 @@ Table "public.matches"
  loser         | integer                     | 
 Triggers:
     standings AFTER INSERT ON matches FOR EACH ROW EXECUTE PROCEDURE updatestandings()
-
-Table "public.tournament"
+```
+- Table "public.tournament"
        Column       |  Type   | Modifiers 
 --------------------+---------+-----------
  tournament_id      | integer | not null
