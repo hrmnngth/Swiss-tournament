@@ -80,6 +80,7 @@ class TournamentSwissDb(object):
             self._cursor.execute(query, data)
             self._connection.commit()
 
+
     def checkAlreadyRegistered(self, name):
         '''Verifies if player already registered in the DB
 
@@ -455,3 +456,7 @@ class TournamentSwissDb(object):
 
         self._connection.close()
         print 'Connection is closed'
+
+    def rollback(self):
+        ''' Rollback transaction'''
+        self._connection.rollback()        

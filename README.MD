@@ -50,7 +50,7 @@ To see all database information (schema, tables, relation, etc) and the componen
 ## Contributors
 
 This project is created by [Hermann Hernández](https://twitter.com/hrmnn_mx)
-
+there are lot of contributors to this project
 
 ## License
 

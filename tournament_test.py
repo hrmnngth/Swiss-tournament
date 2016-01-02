@@ -137,8 +137,20 @@ def testTournamentMultiPlayers():
     start_time = time.time()    
     print "Number of competitors [",conn_tournmt._competitors,"]"
     for i in range(conn_tournmt._competitors):
-        # register players' name randomly using the module names     
-        conn_tournmt.registerPlayer(names.get_full_name())
+        # register players' name randomly using the module names
+        #name_player=names.get_full_name()
+        #while not name_player in players_list: # avoid to insert player duplicated in same tournament
+        try:
+            conn_tournmt.registerPlayer(names.get_full_name())
+        except Exception as ex:
+            conn_tournmt.rollback()
+            if ex.pgcode == '23505': # avoit duplicated player in same tournament            
+                conn_tournmt.registerPlayer(names.get_full_name())
+            else:
+                raise Exception('Unexpected error registering players') 
+        #   print players_list
+        #else:
+        #    name_player=names.get_full_name()        
     testRandomInit()
     while id_round <=conn_tournmt._total_rounds:
         print "Round=[",id_round,"]"        
@@ -172,12 +184,13 @@ if __name__ == '__main__':
     #Define settings of the tournament, required for testTournamentMultiPlayers
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
     data=[1234,'Tournament swissPairings','Mexico city','2015-12-01',
-          '205-12-30',17]
-    # Udacity test nanodegree program      
+          '205-12-30',20]    
     conn_tournmt=tournament.TournamentSwissDb()
     conn_tournmt.connect()
     conn_tournmt.setTournamentInfo(data)
-    testDeleteMatches()
+
+    # Udacity test nanodegree program
+    '''testDeleteMatches()
     testDelete()
     testCount()
     testRegister()
@@ -186,9 +199,9 @@ if __name__ == '__main__':
     testStandingsBeforeMatches()
     reportMatches()
     testPairings()
-    
+    '''
     # Test extended implementation (multi-players and multi-tournaments)
-    #testTournamentMultiPlayers()
+    testTournamentMultiPlayers()
     
     print "Success!  All tests pass!"
 

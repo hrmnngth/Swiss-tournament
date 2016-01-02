@@ -34,6 +34,8 @@ create table matches (
 	winner integer, 
 	loser integer );
 
+create index matches_idx01 on matches (winner,loser);
+
 create table players (
 	player_id integer PRIMARY KEY,
 	full_name text,
@@ -51,12 +53,15 @@ create table player_standings (
 	byes integer, 
 	tournament_id integer );
 
+ALTER TABLE player_standings ADD PRIMARY KEY (player_id,tournament_id);
+
+
 create table players_tournament (
 	player_id integer,
 	rank_ini integer,
 	rank_fin integer,
 	tournament_id integer);
-
+ALTER TABLE players_tournament ADD PRIMARY KEY (player_id,tournament_id);
 
 create view v_standings as 
 	SELECT A.PLAYER_ID, A.FULL_NAME, COALESCE(B.WINS,0) WINS, 
@@ -66,6 +71,7 @@ create view v_standings as
     LEFT OUTER JOIN PLAYER_STANDINGS B ON 
     (A.PLAYER_ID=B.PLAYER_ID and b.tournament_id=a.tournament_id)
     ORDER BY WINS desc, byes desc, RANK_INI, TIEDS,TOURNAMENT_ID;
+
 
 
 create sequence id_player_sequence start 101 maxvalue 999999;
