@@ -1,7 +1,8 @@
 ## Database scheme:
 ### Tables:
 - Table "public.players"
-```    Column       |  Type   | Modifiers 
+```
+       Column       |  Type   | Modifiers 
 --------------------+---------+-----------
  player_id          | integer | not null
  full_name          | text    | 
@@ -15,7 +16,8 @@ Triggers:
     playertournament AFTER INSERT OR UPDATE ON players FOR EACH ROW EXECUTE PROCEDURE regplayertournament()
 ```
 - Table "public.player_standings"
-``` Column     |  Type   | Modifiers 
+```
+    Column     |  Type   | Modifiers 
 ---------------+---------+-----------
  player_id     | integer | 
  wins          | integer | 
@@ -28,7 +30,8 @@ Triggers:
     "player_standings_pkey" PRIMARY KEY, btree (player_id, tournament_id)
 ```
 - Table "public.matches"
-``` Column     |            Type             | Modifiers 
+```
+    Column     |            Type             | Modifiers 
 ---------------+-----------------------------+-----------
  tournament_id | integer                     | 
  round         | integer                     | 
@@ -39,7 +42,8 @@ Triggers:
     standings AFTER INSERT ON matches FOR EACH ROW EXECUTE PROCEDURE updatestandings()
 ```
 - Table "public.tournament"
-```    Column       |  Type   | Modifiers 
+```
+       Column       |  Type   | Modifiers 
 --------------------+---------+-----------
  tournament_id      | integer | not null
  tournament_name    | text    | 
@@ -53,7 +57,8 @@ Indexes:
     "tournament_pkey" PRIMARY KEY, btree (tournament_id)
 ```
 - Table "public.players_tournament"
-``` Column     |  Type   | Modifiers 
+```
+    Column     |  Type   | Modifiers 
 ---------------+---------+-----------
  player_id     | integer | 
  rank_ini      | integer | 
@@ -64,7 +69,8 @@ Indexes:
 ```
 ### Views:
 - View "public.v_standings"
-``` Column     |  Type   | Modifiers 
+```
+    Column     |  Type   | Modifiers 
 ---------------+---------+-----------
  player_id     | integer | 
  full_name     | text    | 
@@ -72,6 +78,6 @@ Indexes:
  matches       | integer | 
  rank_ini      | integer | 
  tournament_id | integer | 
-
+```
 
 
