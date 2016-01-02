@@ -200,7 +200,7 @@ if __name__ == '__main__':
     reportMatches()
     testPairings()
     '''
-    # Test extended implementation (multi-players and multi-tournaments)
+    # Test extended implementation (multi-players and multi-tournaments) "comment functions nanodegree program"
     testTournamentMultiPlayers()
     
     print "Success!  All tests pass!"
