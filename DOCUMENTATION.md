@@ -59,6 +59,8 @@ Table "public.players_tournament"
  rank_ini      | integer | 
  rank_fin      | integer | 
  tournament_id | integer | 
+Indexes:
+    "players_tournament_pkey" PRIMARY KEY, btree (player_id, tournament_id)
 
 ### Views:
 View "public.v_standings"
