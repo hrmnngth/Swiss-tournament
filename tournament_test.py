@@ -134,12 +134,11 @@ def testPairings():
 
 def testTournamentMultiPlayers():
     id_round=1
-    start_time = time.time()    
+    start_time = time.time()
+    final_players= list()
     print "Number of competitors [",conn_tournmt._competitors,"]"
     for i in range(conn_tournmt._competitors):
         # register players' name randomly using the module names
-        #name_player=names.get_full_name()
-        #while not name_player in players_list: # avoid to insert player duplicated in same tournament
         try:
             conn_tournmt.registerPlayer(names.get_full_name())
         except Exception as ex:
@@ -148,16 +147,12 @@ def testTournamentMultiPlayers():
                 conn_tournmt.registerPlayer(names.get_full_name())
             else:
                 raise Exception('Unexpected error registering players') 
-        #   print players_list
-        #else:
-        #    name_player=names.get_full_name()        
     testRandomInit()
     while id_round <=conn_tournmt._total_rounds:
         print "Round=[",id_round,"]"        
         swiss= conn_tournmt.swissPairingsExtend()
-        print "\n"
-        print "Next match=",swiss
-        print "\n"
+        print '\n'
+        print "Next match=",swiss,'\n'        
         current_date = datetime.datetime.now()
         current_date= current_date.replace(microsecond=0)
         for z in range(len(swiss)):
@@ -170,7 +165,30 @@ def testTournamentMultiPlayers():
             conn_tournmt.reportMatchExtend(swiss[z][winner],swiss[z][losser],
                 id_round,current_date)        
         conn_tournmt._connection.commit()
-        id_round +=1    
+        id_round +=1
+    print '   Swiss tournament ended\n'
+    final_players=conn_tournmt.topEightPlayers()
+    print ' The final 8 players using poinst-opponents for tie-break:'
+    print final_players,'\n'
+    print '---Starting single-elimination-tournament---'
+    while id_round <=conn_tournmt._total_rounds+3:        
+        print "Round final=[",id_round,"]"        
+        single= conn_tournmt.siglePairingElimination()        
+        print "Next match=",single, '\n'    
+        current_date = datetime.datetime.now()
+        current_date= current_date.replace(microsecond=0)
+        for z in range(len(single)):
+            winner=random.randint(0,1)
+            if winner==0:
+                losser=2
+            else:
+                losser=0
+                winner=2
+            conn_tournmt.reportMatchExtend(single[z][winner],single[z][losser],
+                id_round,current_date)        
+        conn_tournmt._connection.commit()
+        id_round +=1
+    conn_tournmt.updateWinnerTournament()
     conn_tournmt.closeConnect()
     print("Total execution --- %s seconds ---" % (time.time() - start_time))
 
@@ -184,7 +202,7 @@ if __name__ == '__main__':
     #Define settings of the tournament, required for testTournamentMultiPlayers
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
     data=[1234,'Tournament swissPairings','Mexico city','2015-12-01',
-          '205-12-30',20]    
+          '205-12-30',13]    
     conn_tournmt=tournament.TournamentSwissDb()
     conn_tournmt.connect()
     conn_tournmt.setTournamentInfo(data)

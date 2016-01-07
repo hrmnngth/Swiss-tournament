@@ -24,8 +24,8 @@ create table tournament (
 	start_date date,  
 	end_date date, 
 	number_competitors integer, 
-	winner integer, 
-	second_place integer);
+	winner xml, 
+	second_place xml);
 
 create table matches ( 
 	tournament_id integer, 
@@ -50,7 +50,8 @@ create table player_standings (
 	losses integer, 
 	tieds integer,
 	matches integer,
-	byes integer, 
+	byes integer,
+	points double precision,
 	tournament_id integer );
 
 ALTER TABLE player_standings ADD PRIMARY KEY (player_id,tournament_id);
@@ -65,12 +66,12 @@ ALTER TABLE players_tournament ADD PRIMARY KEY (player_id,tournament_id);
 
 create view v_standings as 
 	SELECT A.PLAYER_ID, A.FULL_NAME, COALESCE(B.WINS,0) WINS, 
-    COALESCE(B.MATCHES,0) MATCHES, a.RANK_INI, a.TOURNAMENT_ID FROM 
-    (select c.player_id,c.full_name,d.rank_ini,d.tournament_id 
+    COALESCE(B.MATCHES,0) MATCHES,b.byes, B.POINTS, a.RANK_INI,a.rank_fin, a.TOURNAMENT_ID FROM 
+    (select c.player_id,c.full_name,d.rank_ini,D.RANK_FIN,d.tournament_id 
     from players c, players_tournament d where c.player_id=d.player_id) A 
     LEFT OUTER JOIN PLAYER_STANDINGS B ON 
     (A.PLAYER_ID=B.PLAYER_ID and b.tournament_id=a.tournament_id)
-    ORDER BY WINS desc, byes desc, RANK_INI, TIEDS,TOURNAMENT_ID;
+    ORDER BY TOURNAMENT_ID, WINS desc, byes desc, points desc,TIEDS;
 
 
 
@@ -95,25 +96,28 @@ create or replace function updateStandings() returns trigger as $updateStandings
 	begin
 
 		if new.loser=0 then
-			update player_standings set wins=wins+1, matches=matches+1, byes=byes+1 where player_id=new.winner and tournament_id=new.tournament_id;
+			update player_standings set wins=wins+1, matches=matches+1, byes=byes+1
+				where player_id=new.winner and tournament_id=new.tournament_id;
 			if not found then
-				insert into player_standings (player_id, wins, losses, tieds, matches,byes, tournament_id)
-					values (new.winner, 1,0,0,1,1,new.tournament_id);
+				insert into player_standings (player_id, wins, losses, tieds, matches,byes,points, tournament_id)
+					values (new.winner, 1,0,0,1,1,new.round/2,new.tournament_id);
 			end if;
 		end if;
 
 		if new.loser>0 then
 
-			update player_standings set wins=wins+1, matches=matches+1 where player_id=new.winner and tournament_id=new.tournament_id;
+			update player_standings set wins=wins+1, matches=matches+1, points=points+new.round
+				where player_id=new.winner and tournament_id=new.tournament_id;
 			if not found then
-				insert into player_standings (player_id, wins, losses, tieds, matches,byes, tournament_id)
-					values (new.winner, 1,0,0,1,0,new.tournament_id);
+				insert into player_standings (player_id, wins, losses, tieds, matches,byes,points, tournament_id)
+					values (new.winner, 1,0,0,1,0,1,new.tournament_id);
 			end if;
 		
-			update player_standings set losses=losses+1, matches=matches+1 where player_id=new.loser and tournament_id=new.tournament_id;
+			update player_standings set losses=losses+1, matches=matches+1
+				where player_id=new.loser and tournament_id=new.tournament_id;
 			if not found then
-			insert into player_standings (player_id, wins, losses, tieds, matches,byes, tournament_id)
-				values (new.loser, 0,1,0,1,0,new.tournament_id);
+			insert into player_standings (player_id, wins, losses, tieds, matches,byes,points, tournament_id)
+				values (new.loser, 0,1,0,1,0,0,new.tournament_id);
 			end if;
 		end if;
 		return null;

@@ -51,13 +51,13 @@ The steps to quick start are:
 
 ## Documentation
 
-To see all database information (schema, tables, relation, etc) and the components, modules implemented, check [DOCUMENTATION.MD](https://github.com/hrmnngth/Swiss-tournament/blob/master/DOCUMENTATION.md)
+To see all database information (schema, tables, view, etc), packages and aditional components, check [DOCUMENTATION.MD](https://github.com/hrmnngth/Swiss-tournament/blob/master/DOCUMENTATION.md)
 
 
 ## Contributors
 
 This project is created by [Hermann Hernández](https://twitter.com/hrmnn_mx)
-#### Modules used in this project
+#### Third-party-modules used in this project
 Package [names](https://pypi.python.org/pypi/names) is created by Trey Hunner, version 0.3.0, MIT License
 
 ## License

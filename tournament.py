@@ -9,6 +9,7 @@ import random
 import player
 import itertools
 import datetime
+import xml.etree.ElementTree as ET
 
 class TournamentSwissDb(object):
     _connection = None
@@ -68,8 +69,7 @@ class TournamentSwissDb(object):
         c = self.checkAlreadyRegistered(name)
         if c > 0:
             query = 'UPDATE PLAYERS SET LAST_TRNMNT_RGSTRD=%s \
-                     WHERE PLAYER_ID=%s'
-            print name
+                     WHERE PLAYER_ID=%s'            
             data = (self._tournament_id, c)
             self._cursor.execute(query, data)
             self._connection.commit()
@@ -214,6 +214,8 @@ class TournamentSwissDb(object):
                     if not prev_last_player:
                         # If there's not a last player of the previous key, it
                         # gets a round bye
+                        print 'Player with round bye'
+                        print actual_player.getPlayerId(),'|',actual_player.getName()
                         self.roundBye(actual_player, self._round)
                     else:
                         # make pairing last player of previous key with the
@@ -450,6 +452,125 @@ class TournamentSwissDb(object):
                  LOSER) VALUES (%s,%s,%s,%s,%s);'
         data = (self._tournament_id, round_, date_match, winner, loser, )
         self._cursor.execute(query, data)
+
+    def topEightPlayers(self):
+        query = 'SELECT WINS, COUNT(1) AS TOT FROM V_STANDINGS \
+                 WHERE TOURNAMENT_ID=%s GROUP BY WINS ORDER BY WINS DESC'
+        data = (self._tournament_id,)
+        self._cursor.execute(query, data)
+        result = self._cursor.fetchall()
+        i=0
+        sum_wins=0
+        final_players=list()        
+        for res in result:
+            sum_wins=sum_wins+res[1]
+            if sum_wins<=8:
+                final_players.append(self.getFinalPlayers(res[i]))
+                sum_aux=sum_wins
+            else:                
+                final_players.append(self.tieBreakRule(res, sum_aux))
+                break
+        query='UPDATE PLAYERS_TOURNAMENT SET RANK_FIN=%s WHERE PLAYER_ID=%s \
+                AND TOURNAMENT_ID=%s'
+        z=1
+        for x in final_players:
+            for y in x:
+                data=(z,y[0],self._tournament_id)
+                result=self._cursor.execute(query, data)
+                z+=1
+        self._connection.commit()
+        return final_players
+
+
+    def getFinalPlayers(self, wins_select):
+        query = 'SELECT PLAYER_ID, FULL_NAME FROM V_STANDINGS WHERE TOURNAMENT_ID=%s \
+                 AND WINS=%s'
+        data = (self._tournament_id,wins_select)
+        self._cursor.execute(query, data)
+        result = self._cursor.fetchall()
+        return result
+
+
+    def tieBreakRule(self, wins_select, sum_wins):
+        query='select player, sum(points)tot_points from (\
+            select winner as player,player_id,sum(points)as points \
+            from player_standings a, matches b\
+            where winner in(SELECT PLAYER_ID FROM PLAYER_STANDINGS \
+            WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID) \
+            and a.player_id=b.loser AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
+            AND A.TOURNAMENT_ID=%s group by winner,player_id \
+            union all \
+            select loser,player_id,sum(points) from player_standings a, \
+            matches b \
+            where loser in(SELECT PLAYER_ID FROM PLAYER_STANDINGS \
+            WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID) \
+            and a.player_id=b.winner AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
+            AND A.TOURNAMENT_ID=%s group by loser,player_id order by 1) c \
+            group by player order by tot_points desc limit %s'
+        limit_=8-int(sum_wins)
+        data = (wins_select[0], self._tournament_id, wins_select[0], 
+                self._tournament_id,limit_)
+        self._cursor.execute(query, data)
+        result = self._cursor.fetchall()
+        return result
+
+    def siglePairingElimination(self):
+        pairings=list()                    
+        if self._total_rounds+1 ==self._round:
+            query='SELECT PLAYER_ID, FULL_NAME FROM V_STANDINGS WHERE TOURNAMENT_ID=%s \
+                AND RANK_FIN >0 AND RANK_FIN<=8 ORDER BY RANK_FIN'
+            data = (self._tournament_id,)
+        else:
+            query = 'SELECT C.PLAYER_ID, C.FULL_NAME \
+                FROM MATCHES A, PLAYERS_TOURNAMENT B, V_STANDINGS C \
+                WHERE A.WINNER=B.PLAYER_ID AND B.PLAYER_ID=C.PLAYER_ID \
+                AND A.ROUND=%s AND B.RANK_FIN >0 AND B.RANK_FIN<=8 \
+                AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
+                AND B.TOURNAMENT_ID=C.TOURNAMENT_ID \
+                AND B.TOURNAMENT_ID=%s'
+            data = (self._round-1,self._tournament_id)        
+        self._cursor.execute(query, data)
+        result=self._cursor.fetchall()
+        len_res=len(result)
+        group_a, group_b=result[:len_res/2], result[len_res/2:]                
+        revers=reversed(group_b)
+        for i in group_a:
+            j=next(revers)
+            pairings.append((i[0],i[1],j[0],j[1]))
+        self._round+=1
+
+        return pairings
+
+    def updateWinnerTournament(self):
+        xmlTemplate = """<root><player><id>%(player_id)s</id> \
+                        <name>%(full_name)s</name></player></root>"""
+        query='''SELECT 'player_id' AS ID,WINNER ,'full_name' AS NAME, FULL_NAME \
+                FROM MATCHES A, PLAYERS B \
+                WHERE TOURNAMENT_ID=%s AND WINNER=PLAYER_ID AND ROUND=%s'''
+        data = (self._tournament_id,self._total_rounds+3)
+        self._cursor.execute(query, data)        
+        for i in self._cursor.fetchall(): result=list(i)
+        it=iter(result)
+        winner = xmlTemplate%dict(zip(it,it))
+        query='''SELECT 'player_id' AS ID,loser ,'full_name' AS NAME, FULL_NAME \
+                FROM MATCHES A, PLAYERS B \
+                WHERE TOURNAMENT_ID=%s AND LOSER=PLAYER_ID AND ROUND=%s'''
+        data = (self._tournament_id,self._total_rounds+3)
+        self._cursor.execute(query, data)
+        for i in self._cursor.fetchall(): result=list(i)
+        it=iter(result)        
+        second_place = xmlTemplate%dict(zip(it,it))
+
+        query = 'UPDATE TOURNAMENT SET WINNER=%s, SECOND_PLACE=%s \
+                     WHERE TOURNAMENT_ID=%s'            
+        data = (winner,second_place,self._tournament_id)
+        self._cursor.execute(query, data)
+        self._connection.commit()
+        root = ET.fromstring(winner)
+        for elem in root.findall('player'): name_winner=elem.find('name').text
+        print 'The WINNER OF THE TOURNAMENT IS [',name_winner,']'
+        print '\n'
+
 
     def closeConnect(self):
         ''' Close the connection to the database tournament'''
