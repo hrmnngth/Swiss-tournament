@@ -7,7 +7,6 @@ import psycopg2
 import collections
 import random
 import player
-import itertools
 import datetime
 import xml.etree.ElementTree as ET
 
@@ -370,7 +369,9 @@ class Swiss(Tournament):
                         del v_stndgs[k][val_rndm]
                         prev_last_player = []
                         break
-                if tot_items == 1:  # last player of the list
+                if tot_items == 1:  
+                    # last player of the list, no more players with same standing
+                    # to be paired. it will be used in the next highest standing
                     prev_last_player = actual_player
                     break
                 if not prev_last_player:
@@ -532,6 +533,9 @@ class Swiss(Tournament):
           wins_select: (list) a list of group of wins with final standings
           sum_wins: (int) the number of wins that produce tied players
         '''
+        # complex query statement to get opponents points of players with same
+        # wins. It selects the necessary players with highest points to complete        
+        # the top 8 ( check the last part of statement LIMIT %s)
         query = 'SELECT PLAYER, SUM(POINTS)TOT_POINTS FROM (\
             SELECT WINNER AS PLAYER,PLAYER_ID,SUM(POINTS)AS POINTS \
             FROM PLAYER_STANDINGS A, MATCHES B\
@@ -554,29 +558,32 @@ class Swiss(Tournament):
         return result
 
     def topEightPlayers(self):
-        ''' Determines the top 8 players
+        ''' Determines the top 8 players after finished the swiss Tournament
 
+        It considers players' points to stablish the ranking. 
         This method calls tie-break-rule to select players who are tied wit 
         same score. 
         Returns:
           final_players: list() The list of 8 players with best standings
         '''
-        query = 'SELECT WINS, COUNT(1) AS TOT FROM V_STANDINGS \
-                 WHERE TOURNAMENT_ID=%s GROUP BY WINS ORDER BY WINS DESC'
+        query = 'SELECT WINS, COUNT(1) AS TOT FROM \
+                (SELECT WINS FROM V_STANDINGS WHERE TOURNAMENT_ID=%s \
+                ORDER BY WINS DESC, POINTS DESC) A \
+                GROUP BY WINS ORDER BY WINS DESC'
         data = (self._tournament_id,)
         result = self.conn_trnmt_db.dbQuery(query, data)
         sum_wins = 0
         sum_aux = 0
         final_players = list()
-        for res in result:
-            sum_wins = sum_wins+res[1]
+        for rows in result:
+            sum_wins = sum_wins+rows[1]
             if sum_wins <= 8:
                 final_players.append(
                     self.conn_trnmt_db.getFinalPlayers(
-                        self._tournament_id, res[0]))
+                        self._tournament_id, rows[0]))
                 sum_aux = sum_wins
             else:
-                final_players.append(self.tieBreakRule(res, sum_aux))
+                final_players.append(self.tieBreakRule(rows, sum_aux))
                 break
         query = 'UPDATE PLAYERS_TOURNAMENT SET RANK_FIN=%s WHERE PLAYER_ID=%s \
                 AND TOURNAMENT_ID=%s'

@@ -160,7 +160,8 @@ def testTournamentMultiPlayers():
     for i in final_stands:
         print i[0],'|',i[1][:10],'|',i[2] # it prints ID | NAME | WINS
     final_players=swiss_trnmnt.topEightPlayers()
-    print ' \nThe final 8 players using poinst-opponents for tie-break:'
+    print (''' \nThe final 8 players using poinst-opponents for tie-break \
+(player_id,opponents' points):''')
     print final_players,'\n'
     print '---Starting single-elimination-swiss_trnmnt---'
     while id_round <=swiss_trnmnt._total_rounds+3: # round's number for single is 3
