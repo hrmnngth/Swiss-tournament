@@ -195,7 +195,7 @@ if __name__ == '__main__':
     #Define settings of the swiss_trnmnt, required for testTournamentMultiPlayers
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
     data=[1234,'swiss_trnmnt swissPairings','Mexico city','2015-12-01',
-          '205-12-30',13]    
+          '205-12-30',20]     
     swiss_trnmnt=tournament.Swiss()
     swiss_trnmnt.setTournamentInfo(data)
 

@@ -354,7 +354,7 @@ class Swiss(Tournament):
                         # If there's not a last player of the previous key, it
                         # gets a round bye
                         print 'Player with round bye'
-                        print (actual_player.getPlayerId(), '|',
+                        print (actual_player.getPlayerId(),
                                actual_player.getName())
                         self.roundBye(actual_player, self._round)
                     else:
@@ -381,8 +381,9 @@ class Swiss(Tournament):
                     # the result is the position in the current list
                     oppnt_player = self.checkPlayersBye(
                         v_stndgs[k][1:], players_bye)
+                    if oppnt_player >-1: oppnt_player+=1
                     val_rndm, match_with_bye = self.valOponent(
-                        oppnt_player, tot_items)
+                        oppnt_player, tot_items)                                        
                     while alrdy_match:
                         # check if the opponents have already matched in order to
                         # get a new opponent randonmly
@@ -428,9 +429,9 @@ class Swiss(Tournament):
                     # This block make pairing between last player of previous
                     # key and it seeks a opponent base on priority
                     oppnt_player = self.checkPlayersBye(
-                        v_stndgs[k][1:], players_bye)
+                        v_stndgs[k], players_bye)
                     val_rndm, match_with_bye = self.valOponent(
-                        oppnt_player, tot_items)                    
+                        oppnt_player, tot_items)
                     while alrdy_match:
                         alrdy_match = self.previusMatch(
                             prev_last_player.getPlayerId(),
@@ -513,12 +514,11 @@ class Swiss(Tournament):
     def checkPlayersBye(self, list_current, list_byes):
         index_list = -1
         for iter1 in list_byes:
-            idx = 1
+            idx = 0
             for iter2 in list_current:
-                if iter1[0] == iter2.getPlayerId():
-                    print iter1[0], '|', iter2.getPlayerId()
+                if iter1[0] == iter2.getPlayerId():                    
                     index_list = idx
-                    break
+                    return index_list
                     break
                 idx += 1
         return index_list
@@ -536,18 +536,19 @@ class Swiss(Tournament):
         # complex query statement to get opponents points of players with same
         # wins. It selects the necessary players with highest points to complete        
         # the top 8 ( check the last part of statement LIMIT %s)
+        # the second level to break tied players is players points
         query = 'SELECT PLAYER, SUM(POINTS)TOT_POINTS FROM (\
             SELECT WINNER AS PLAYER,PLAYER_ID,SUM(POINTS)AS POINTS \
             FROM PLAYER_STANDINGS A, MATCHES B\
             WHERE WINNER IN(SELECT PLAYER_ID FROM PLAYER_STANDINGS \
-            WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID) \
+            WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID ORDER BY POINTS DESC) \
             AND A.PLAYER_ID=B.LOSER AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
             AND A.TOURNAMENT_ID=%s GROUP BY WINNER,PLAYER_ID \
             UNION ALL \
             SELECT LOSER,PLAYER_ID,SUM(POINTS) FROM PLAYER_STANDINGS A, \
             MATCHES B \
             WHERE LOSER IN(SELECT PLAYER_ID FROM PLAYER_STANDINGS \
-            WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID) \
+            WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID ORDER BY POINTS DESC) \
             AND A.PLAYER_ID=B.WINNER AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
             AND A.TOURNAMENT_ID=%s GROUP BY LOSER,PLAYER_ID ORDER BY 1) C \
             GROUP BY PLAYER ORDER BY TOT_POINTS DESC LIMIT %s'
