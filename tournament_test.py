@@ -9,20 +9,20 @@ import random
 import time
 
 def testDeleteMatches():
-    conn_tournmt.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
     print "1. Old matches can be deleted."
 
 
 def testDelete():
-    conn_tournmt.deleteMatches()
-    conn_tournmt.deletePlayers()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
     print "2. Player records can be deleted."
 
 
 def testCount():
-    conn_tournmt.deleteMatches()
-    conn_tournmt.deletePlayers()
-    c = conn_tournmt.countPlayers()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
+    c = swiss_trnmnt.conn_trnmt_db.countPlayers()
     if c == '0':
         raise TypeError(
             "countPlayers() should return numeric zero, not string '0'.")
@@ -32,11 +32,11 @@ def testCount():
 
 
 def testRegister():
-    conn_tournmt.deleteMatches()
-    conn_tournmt.deletePlayers()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
     print ("register player")
-    conn_tournmt.registerPlayer("Chandra Nalaar")
-    c = conn_tournmt.countPlayers()
+    swiss_trnmnt.registerPlayer("Chandra Nalaar")
+    c = swiss_trnmnt.conn_trnmt_db.countPlayers()
     if c != 1:
         raise ValueError(
             "After one player registers, countPlayers() should be 1.")
@@ -44,30 +44,29 @@ def testRegister():
 
 
 def testRegisterCountDelete():
-    conn_tournmt.deleteMatches()
-    conn_tournmt.deletePlayers()
-    conn_tournmt.registerPlayer("Markov Chaney")
-    conn_tournmt.registerPlayer("Joe Malik")
-    conn_tournmt.registerPlayer("Mao Tsu-hsi")
-    conn_tournmt.registerPlayer("Atlanta Hope")
-    c = conn_tournmt.countPlayers()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
+    swiss_trnmnt.registerPlayer("Markov Chaney")
+    swiss_trnmnt.registerPlayer("Joe Malik")
+    swiss_trnmnt.registerPlayer("Mao Tsu-hsi")
+    swiss_trnmnt.registerPlayer("Atlanta Hope")
+    c = swiss_trnmnt.conn_trnmt_db.countPlayers()
     if c != 4:
         raise ValueError(
             "After registering four players, countPlayers should be 4.")
-    conn_tournmt.deletePlayers()
-    c = conn_tournmt.countPlayers()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
+    c = swiss_trnmnt.conn_trnmt_db.countPlayers()
     if c != 0:
         raise ValueError("After deleting, countPlayers should return zero.")
     print "5. Players can be registered and deleted."
 
 
 def testStandingsBeforeMatches():
-    conn_tournmt.deleteMatches()
-    conn_tournmt.deletePlayers()
-    conn_tournmt.registerPlayer("Melpomene Murray")
-    conn_tournmt.registerPlayer("Randy Schwartz")
-    conn_tournmt.rankingInit()
-    standings = conn_tournmt.playerStandings()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
+    swiss_trnmnt.registerPlayer("Melpomene Murray")
+    swiss_trnmnt.registerPlayer("Randy Schwartz")
+    standings = swiss_trnmnt.playerStandings()
     if len(standings) < 2:
         raise ValueError("Players should appear in playerStandings even before "
                          "they have played any matches.")
@@ -86,18 +85,17 @@ def testStandingsBeforeMatches():
 
 
 def reportMatches():
-    conn_tournmt.deleteMatches()
-    conn_tournmt.deletePlayers()
-    conn_tournmt.registerPlayer("Bruno Walton")
-    conn_tournmt.registerPlayer("Boots O'Neal")
-    conn_tournmt.registerPlayer("Cathy Burton")
-    conn_tournmt.registerPlayer("Diane Grant")
-    conn_tournmt.rankingInit()
-    standings = conn_tournmt.playerStandings()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
+    swiss_trnmnt.registerPlayer("Bruno Walton")
+    swiss_trnmnt.registerPlayer("Boots O'Neal")
+    swiss_trnmnt.registerPlayer("Cathy Burton")
+    swiss_trnmnt.registerPlayer("Diane Grant")
+    standings = swiss_trnmnt.playerStandings()
     [id1, id2, id3, id4] = [row[0] for row in standings]
-    conn_tournmt.reportMatch(id1, id2)
-    conn_tournmt.reportMatch(id3, id4)
-    standings = conn_tournmt.playerStandings()
+    swiss_trnmnt.reportMatch(id1, id2)
+    swiss_trnmnt.reportMatch(id3, id4)
+    standings = swiss_trnmnt.playerStandings()
     for (i, n, w, m) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
@@ -109,17 +107,17 @@ def reportMatches():
 
 
 def testPairings():
-    conn_tournmt.deleteMatches()
-    conn_tournmt.deletePlayers()
-    conn_tournmt.registerPlayer("Twilight Sparkle")
-    conn_tournmt.registerPlayer("Fluttershy")
-    conn_tournmt.registerPlayer("Applejack")
-    conn_tournmt.registerPlayer("Pinkie Pie")
-    standings = conn_tournmt.playerStandings()
+    swiss_trnmnt.conn_trnmt_db.deleteMatches()
+    swiss_trnmnt.conn_trnmt_db.deletePlayers()
+    swiss_trnmnt.registerPlayer("Twilight Sparkle")
+    swiss_trnmnt.registerPlayer("Fluttershy")
+    swiss_trnmnt.registerPlayer("Applejack")
+    swiss_trnmnt.registerPlayer("Pinkie Pie")
+    standings = swiss_trnmnt.playerStandings()
     [id1, id2, id3, id4] = [row[0] for row in standings]
-    conn_tournmt.reportMatch(id1, id2)
-    conn_tournmt.reportMatch(id3, id4)
-    pairings = conn_tournmt.swissPairings()
+    swiss_trnmnt.reportMatch(id1, id2)
+    swiss_trnmnt.reportMatch(id3, id4)
+    pairings = swiss_trnmnt.swissPairings()
     if len(pairings) != 2:
         raise ValueError(
             "For four players, swissPairings should return two pairs.")
@@ -136,76 +134,69 @@ def testTournamentMultiPlayers():
     id_round=1
     start_time = time.time()
     final_players= list()
-    print "Number of competitors [",conn_tournmt._competitors,"]"
-    for i in range(conn_tournmt._competitors):
-        # register players' name randomly using the module names
+    print "Number of competitors [",swiss_trnmnt._competitors,"]"
+    for i in range(swiss_trnmnt._competitors):
+        # register players' name randomly using third-package names
         try:
-            conn_tournmt.registerPlayer(names.get_full_name())
+            swiss_trnmnt.registerPlayer(names.get_full_name())
         except Exception as ex:
-            conn_tournmt.rollback()
-            if ex.pgcode == '23505': # avoit duplicated player in same tournament            
-                conn_tournmt.registerPlayer(names.get_full_name())
+            swiss_trnmnt.rollback()
+            if ex.pgcode == '23505': # avoit duplicated player in same tournamnt
+                swiss_trnmnt.registerPlayer(names.get_full_name())
             else:
-                raise Exception('Unexpected error registering players') 
-    testRandomInit()
-    while id_round <=conn_tournmt._total_rounds:
-        print "Round=[",id_round,"]"        
-        swiss= conn_tournmt.swissPairingsExtend()
+                raise Exception('Unexpected error registering players',str(ex)) 
+    swiss_trnmnt.rankingInit()
+    while id_round <=swiss_trnmnt._total_rounds:
+        print "Round=[",id_round,"]"
+        # result of pairings for next match [(id1,name1,id2,name2),...]     
+        swiss= swiss_trnmnt.swissPairings() 
         print '\n'
-        print "Next match=",swiss,'\n'        
-        current_date = datetime.datetime.now()
-        current_date= current_date.replace(microsecond=0)
-        for z in range(len(swiss)):
-            winner=random.randint(0,1)
-            if winner==0:
-                losser=2
-            else:
-                losser=0
-                winner=2
-            conn_tournmt.reportMatchExtend(swiss[z][winner],swiss[z][losser],
-                id_round,current_date)        
-        conn_tournmt._connection.commit()
+        print "Next match=",swiss,'\n'
+        testMatchesRandomly(swiss,id_round) # establish winner of match randomly          
         id_round +=1
-    print '   Swiss tournament ended\n'
-    final_players=conn_tournmt.topEightPlayers()
-    print ' The final 8 players using poinst-opponents for tie-break:'
+    print '   Swiss swiss_trnmnt finished\n'
+    print '   Final Standings'
+    final_stands=swiss_trnmnt.playerStandings()
+    for i in final_stands:
+        print i[0],'|',i[1][:10],'|',i[2] # it prints ID | NAME | WINS
+    final_players=swiss_trnmnt.topEightPlayers()
+    print ' \nThe final 8 players using poinst-opponents for tie-break:'
     print final_players,'\n'
-    print '---Starting single-elimination-tournament---'
-    while id_round <=conn_tournmt._total_rounds+3:        
+    print '---Starting single-elimination-swiss_trnmnt---'
+    while id_round <=swiss_trnmnt._total_rounds+3: # round's number for single is 3
         print "Round final=[",id_round,"]"        
-        single= conn_tournmt.siglePairingElimination()        
+        single= swiss_trnmnt.siglePairingElimination()        
         print "Next match=",single, '\n'    
-        current_date = datetime.datetime.now()
-        current_date= current_date.replace(microsecond=0)
-        for z in range(len(single)):
-            winner=random.randint(0,1)
-            if winner==0:
-                losser=2
-            else:
-                losser=0
-                winner=2
-            conn_tournmt.reportMatchExtend(single[z][winner],single[z][losser],
-                id_round,current_date)        
-        conn_tournmt._connection.commit()
+        testMatchesRandomly(single,id_round) # establish winner of match randomly
         id_round +=1
-    conn_tournmt.updateWinnerTournament()
-    conn_tournmt.closeConnect()
+    swiss_trnmnt.setWinnerTournament()
+    swiss_trnmnt.closeTournament()
     print("Total execution --- %s seconds ---" % (time.time() - start_time))
 
 
-def testRandomInit():
-    conn_tournmt.rankingInit()
+def testMatchesRandomly(pairings,id_round):
+    current_date = datetime.datetime.now()
+    current_date= current_date.replace(microsecond=0)
+    for z in range(len(pairings)):
+        winner=random.randint(0,1)
+        if winner==0:
+            losser=2
+        else:
+            losser=0
+            winner=2
+        swiss_trnmnt.reportMatch(pairings[z][winner],pairings[z][losser],
+            id_round,current_date)        
+    swiss_trnmnt.commitTournament()   
 
 
 if __name__ == '__main__':
-    print " ---Starting Tournament---"
-    #Define settings of the tournament, required for testTournamentMultiPlayers
+    print " ---Starting swiss_trnmnt---"
+    #Define settings of the swiss_trnmnt, required for testTournamentMultiPlayers
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
-    data=[1234,'Tournament swissPairings','Mexico city','2015-12-01',
+    data=[1234,'swiss_trnmnt swissPairings','Mexico city','2015-12-01',
           '205-12-30',13]    
-    conn_tournmt=tournament.TournamentSwissDb()
-    conn_tournmt.connect()
-    conn_tournmt.setTournamentInfo(data)
+    swiss_trnmnt=tournament.Swiss()
+    swiss_trnmnt.setTournamentInfo(data)
 
     # Udacity test nanodegree program
     '''testDeleteMatches()
@@ -213,12 +204,13 @@ if __name__ == '__main__':
     testCount()
     testRegister()
     testRegisterCountDelete()
-    testRandomInit()
     testStandingsBeforeMatches()
     reportMatches()
     testPairings()
     '''
-    # Test extended implementation (multi-players and multi-tournaments) "comment functions nanodegree program"
+    # To test extended implementation (multi-players and multi-swiss_trnmnts) 
+    # "comment methods for testing nanodegree program"
+    
     testTournamentMultiPlayers()
     
     print "Success!  All tests pass!"

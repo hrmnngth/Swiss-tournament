@@ -5,10 +5,11 @@
 
 class Player(object):
 
-	def __init__(self,wins, player_id, name):
+	def __init__(self,wins, player_id, name,matches):
 		self.wins=wins
 		self.player_id=player_id
-		self.name=name		
+		self.name=name
+		self.matches=matches
 
 	def getWins(self):
 		return self.wins
@@ -18,5 +19,10 @@ class Player(object):
 
 	def getName(self):
 		return self.name
+
+	def getMatches(self):
+		return self.matches
+
+
 
 

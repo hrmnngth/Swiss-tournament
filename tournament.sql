@@ -6,129 +6,132 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
-drop view if exists v_standings;
-drop table if exists tournament;
-drop table if exists matches;
-drop table if exists players;
-drop table if exists player_standings;
-drop table if exists players_tournament;
-drop sequence if exists id_tournament_sequence;
-drop sequence if exists id_player_sequence;
+DROP VIEW IF EXISTS V_STANDINGS;
+DROP TABLE IF EXISTS TOURNAMENT;
+DROP TABLE IF EXISTS MATCHES;
+DROP TABLE IF EXISTS PLAYERS;
+DROP TABLE IF EXISTS PLAYER_STANDINGS;
+DROP TABLE IF EXISTS PLAYERS_TOURNAMENT;
+DROP SEQUENCE IF EXISTS ID_TOURNAMENT_SEQUENCE;
+DROP SEQUENCE IF EXISTS ID_PLAYER_SEQUENCE;
 
 
 
-create table tournament (
-	tournament_id integer PRIMARY KEY, 
-	Tournament_name text, 
-	Tournament_place text, 
-	start_date date,  
-	end_date date, 
-	number_competitors integer, 
-	winner xml, 
-	second_place xml);
+CREATE TABLE TOURNAMENT (
+	TOURNAMENT_ID INTEGER PRIMARY KEY, 
+	TOURNAMENT_NAME TEXT, 
+	TOURNAMENT_PLACE TEXT, 
+	START_DATE DATE,  
+	END_DATE DATE, 
+	NUMBER_COMPETITORS INTEGER, 
+	WINNER XML, 
+	SECOND_PLACE XML);
 
-create table matches ( 
-	tournament_id integer, 
-	round integer, 
-	date_match timestamp, 
-	winner integer, 
-	loser integer );
+CREATE TABLE MATCHES ( 
+	TOURNAMENT_ID INTEGER, 
+	ROUND INTEGER, 
+	DATE_MATCH TIMESTAMP, 
+	WINNER INTEGER, 
+	LOSER INTEGER );
 
-create index matches_idx01 on matches (winner,loser);
+CREATE INDEX MATCHES_IDX01 ON MATCHES (TOURNAMENT_ID,WINNER,LOSER);
 
-create table players (
-	player_id integer PRIMARY KEY,
-	full_name text,
-	birthdate date,
-	age integer,
-	register_date date,
-	last_trnmnt_rgstrd integer);
+CREATE TABLE PLAYERS (
+	PLAYER_ID INTEGER PRIMARY KEY,
+	FULL_NAME TEXT,
+	BIRTHDATE DATE,
+	AGE INTEGER,
+	REGISTER_DATE DATE,
+	LAST_TRNMNT_RGSTRD INTEGER);
 
-create table player_standings ( 
-	player_id integer, 
-	wins integer, 
-	losses integer, 
-	tieds integer,
-	matches integer,
-	byes integer,
-	points double precision,
-	tournament_id integer );
+CREATE INDEX PLAYERS_IDX01 ON PLAYERS(PLAYER_ID);
+CREATE INDEX PLAYERS_IDX02 ON PLAYERS(FULL_NAME);
 
-ALTER TABLE player_standings ADD PRIMARY KEY (player_id,tournament_id);
+CREATE TABLE PLAYER_STANDINGS ( 
+	PLAYER_ID INTEGER, 
+	WINS INTEGER, 
+	LOSSES INTEGER, 
+	TIEDS INTEGER,
+	MATCHES INTEGER,
+	BYES INTEGER,
+	POINTS DOUBLE PRECISION,
+	TOURNAMENT_ID INTEGER );
+
+ALTER TABLE PLAYER_STANDINGS ADD PRIMARY KEY (PLAYER_ID,TOURNAMENT_ID);
 
 
-create table players_tournament (
-	player_id integer,
-	rank_ini integer,
-	rank_fin integer,
-	tournament_id integer);
-ALTER TABLE players_tournament ADD PRIMARY KEY (player_id,tournament_id);
+CREATE TABLE PLAYERS_TOURNAMENT (
+	PLAYER_ID INTEGER,
+	RANK_INI INTEGER,
+	RANK_FIN INTEGER,
+	TOURNAMENT_ID INTEGER);
+ALTER TABLE PLAYERS_TOURNAMENT ADD PRIMARY KEY (PLAYER_ID,TOURNAMENT_ID);
+CREATE INDEX PLAYER_TRNMNT_IDX01 ON PLAYERS_TOURNAMENT(TOURNAMENT_ID);
 
-create view v_standings as 
+CREATE VIEW V_STANDINGS AS 
 	SELECT A.PLAYER_ID, A.FULL_NAME, COALESCE(B.WINS,0) WINS, 
-    COALESCE(B.MATCHES,0) MATCHES,b.byes, B.POINTS, a.RANK_INI,a.rank_fin, a.TOURNAMENT_ID FROM 
-    (select c.player_id,c.full_name,d.rank_ini,D.RANK_FIN,d.tournament_id 
-    from players c, players_tournament d where c.player_id=d.player_id) A 
+    COALESCE(B.MATCHES,0) MATCHES,B.BYES, B.POINTS, A.RANK_INI,A.RANK_FIN, A.TOURNAMENT_ID FROM 
+    (SELECT C.PLAYER_ID,C.FULL_NAME,D.RANK_INI,D.RANK_FIN,D.TOURNAMENT_ID 
+    FROM PLAYERS C, PLAYERS_TOURNAMENT D WHERE C.PLAYER_ID=D.PLAYER_ID) A 
     LEFT OUTER JOIN PLAYER_STANDINGS B ON 
-    (A.PLAYER_ID=B.PLAYER_ID and b.tournament_id=a.tournament_id)
-    ORDER BY TOURNAMENT_ID, WINS desc, byes desc, points desc,TIEDS;
+    (A.PLAYER_ID=B.PLAYER_ID AND B.TOURNAMENT_ID=A.TOURNAMENT_ID)
+    ORDER BY TOURNAMENT_ID, WINS DESC, BYES DESC, POINTS DESC,TIEDS;
 
 
+CREATE SEQUENCE ID_PLAYER_SEQUENCE START 101 MAXVALUE 999999;
+CREATE SEQUENCE ID_TOURNAMENT_SEQUENCE START 10001 MAXVALUE 99999;
 
-create sequence id_player_sequence start 101 maxvalue 999999;
-create sequence id_tournament_sequence start 10001 maxvalue 99999;
+CREATE OR REPLACE FUNCTION REGPLAYERTOURNAMENT() RETURNS TRIGGER AS $REGPLAYERTOURNAMENT$
+	BEGIN
+		INSERT INTO PLAYERS_TOURNAMENT (PLAYER_ID,RANK_INI,RANK_FIN,TOURNAMENT_ID)
+			VALUES(NEW.PLAYER_ID,0,0,NEW.LAST_TRNMNT_RGSTRD);
+		RETURN NULL;
+	END;
 
-create or replace function regPlayerTournament() returns trigger as $regPlayerTournament$
-	begin
-		insert into players_tournament (player_id,rank_ini,rank_fin,tournament_id)
-			values(new.player_id,0,0,new.last_trnmnt_rgstrd);
-		return null;
-	end;
+$REGPLAYERTOURNAMENT$ LANGUAGE PLPGSQL;
 
-$regPlayerTournament$ language plpgsql;
+CREATE TRIGGER PLAYERTOURNAMENT
+	AFTER INSERT OR UPDATE ON PLAYERS
+	FOR EACH ROW
+	EXECUTE PROCEDURE REGPLAYERTOURNAMENT();
 
-create trigger playerTournament
-	after insert or update on players
-	for each row
-	execute procedure regPlayerTournament();
+CREATE OR REPLACE FUNCTION UPDATESTANDINGS() RETURNS TRIGGER AS $UPDATESTANDINGS$
+	BEGIN
 
-create or replace function updateStandings() returns trigger as $updateStandings$
-	begin
+		IF NEW.LOSER=0 THEN
+			UPDATE PLAYER_STANDINGS SET WINS=WINS+1, MATCHES=MATCHES+1, BYES=BYES+1
+				WHERE PLAYER_ID=NEW.WINNER AND TOURNAMENT_ID=NEW.TOURNAMENT_ID;
+			IF NOT FOUND THEN
+				INSERT INTO PLAYER_STANDINGS (PLAYER_ID, WINS, LOSSES, TIEDS, MATCHES,BYES,POINTS, TOURNAMENT_ID)
+					VALUES (NEW.WINNER, 1,0,0,1,1,NEW.ROUND/2,NEW.TOURNAMENT_ID);
+			END IF;
+		END IF;
 
-		if new.loser=0 then
-			update player_standings set wins=wins+1, matches=matches+1, byes=byes+1
-				where player_id=new.winner and tournament_id=new.tournament_id;
-			if not found then
-				insert into player_standings (player_id, wins, losses, tieds, matches,byes,points, tournament_id)
-					values (new.winner, 1,0,0,1,1,new.round/2,new.tournament_id);
-			end if;
-		end if;
+		IF NEW.LOSER>0 THEN
 
-		if new.loser>0 then
-
-			update player_standings set wins=wins+1, matches=matches+1, points=points+new.round
-				where player_id=new.winner and tournament_id=new.tournament_id;
-			if not found then
-				insert into player_standings (player_id, wins, losses, tieds, matches,byes,points, tournament_id)
-					values (new.winner, 1,0,0,1,0,1,new.tournament_id);
-			end if;
+			UPDATE PLAYER_STANDINGS SET WINS=WINS+1, MATCHES=MATCHES+1, POINTS=POINTS+NEW.ROUND
+				WHERE PLAYER_ID=NEW.WINNER AND TOURNAMENT_ID=NEW.TOURNAMENT_ID;
+			IF NOT FOUND THEN
+				INSERT INTO PLAYER_STANDINGS (PLAYER_ID, WINS, LOSSES, TIEDS, MATCHES,BYES,POINTS, TOURNAMENT_ID)
+					VALUES (NEW.WINNER, 1,0,0,1,0,1,NEW.TOURNAMENT_ID);
+			END IF;
 		
-			update player_standings set losses=losses+1, matches=matches+1
-				where player_id=new.loser and tournament_id=new.tournament_id;
-			if not found then
-			insert into player_standings (player_id, wins, losses, tieds, matches,byes,points, tournament_id)
-				values (new.loser, 0,1,0,1,0,0,new.tournament_id);
-			end if;
-		end if;
-		return null;
-	end;
+			UPDATE PLAYER_STANDINGS SET LOSSES=LOSSES+1, MATCHES=MATCHES+1
+				WHERE PLAYER_ID=NEW.LOSER AND TOURNAMENT_ID=NEW.TOURNAMENT_ID;
+			IF NOT FOUND THEN
+			INSERT INTO PLAYER_STANDINGS (PLAYER_ID, WINS, LOSSES, TIEDS, MATCHES,BYES,POINTS, TOURNAMENT_ID)
+				VALUES (NEW.LOSER, 0,1,0,1,0,0,NEW.TOURNAMENT_ID);
+			END IF;
+		END IF;
+		RETURN NULL;
+	END;
 
-$updateStandings$ language plpgsql;
+$UPDATESTANDINGS$ LANGUAGE PLPGSQL;
 
-create trigger standings
-	after insert on matches
-	for each row
-	execute procedure updateStandings();
+CREATE TRIGGER STANDINGS
+	AFTER INSERT ON MATCHES
+	FOR EACH ROW
+	EXECUTE PROCEDURE UPDATESTANDINGS();
 
 
 
