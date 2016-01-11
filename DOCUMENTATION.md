@@ -2,7 +2,6 @@
 ### Tables:
 - Table "public.players"
 ```
-       Column       |  Type   | Modifiers 
 --------------------+---------+-----------
  player_id          | integer | not null
  full_name          | text    | 
@@ -12,6 +11,8 @@
  last_trnmnt_rgstrd | integer | 
 Indexes:
     "players_pkey" PRIMARY KEY, btree (player_id)
+    "players_idx01" btree (player_id)
+    "players_idx02" btree (full_name)
 Triggers:
     playertournament AFTER INSERT OR UPDATE ON players FOR EACH ROW EXECUTE PROCEDURE regplayertournament()
 ```
@@ -38,6 +39,8 @@ Triggers:
  date_match    | timestamp without time zone | 
  winner        | integer                     | 
  loser         | integer                     | 
+Indexes:
+    "matches_idx01" btree (tournament_id, winner, loser)
 Triggers:
     standings AFTER INSERT ON matches FOR EACH ROW EXECUTE PROCEDURE updatestandings()
 ```
@@ -51,8 +54,8 @@ Triggers:
  start_date         | date    | 
  end_date           | date    | 
  number_competitors | integer | 
- winner             | integer | 
- second_place       | integer | 
+ winner             | xml     | 
+ second_place       | xml     | 
 Indexes:
     "tournament_pkey" PRIMARY KEY, btree (tournament_id)
 ```
@@ -60,24 +63,28 @@ Indexes:
 ```
     Column     |  Type   | Modifiers 
 ---------------+---------+-----------
- player_id     | integer | 
+ player_id     | integer | not null
  rank_ini      | integer | 
  rank_fin      | integer | 
- tournament_id | integer | 
+ tournament_id | integer | not null
 Indexes:
     "players_tournament_pkey" PRIMARY KEY, btree (player_id, tournament_id)
+    "player_trnmnt_idx01" btree (tournament_id)
 ```
 ### Views:
 - View "public.v_standings"
 ```
-    Column     |  Type   | Modifiers 
----------------+---------+-----------
- player_id     | integer | 
- full_name     | text    | 
- wins          | integer | 
- matches       | integer | 
- rank_ini      | integer | 
- tournament_id | integer | 
+    Column     |       Type       | Modifiers 
+---------------+------------------+-----------
+ player_id     | integer          | 
+ full_name     | text             | 
+ wins          | integer          | 
+ matches       | integer          | 
+ byes          | integer          | 
+ points        | double precision | 
+ rank_ini      | integer          | 
+ rank_fin      | integer          | 
+ tournament_id | integer          | 
 ```
 
 ### Aditional Packages
