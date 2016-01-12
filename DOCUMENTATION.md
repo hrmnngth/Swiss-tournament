@@ -90,8 +90,8 @@ Indexes:
 ### Aditional Packages
 This implementation is supported by the following packages. Click on it to see original source.
 
-    - [psycopg2](http://initd.org/psycopg/docs): Postgres database library
-    - [names](https://pypi.python.org/pypi/names): Package index to generate random names
+- [psycopg2](http://initd.org/psycopg/docs): Postgres database library
+- [names](https://pypi.python.org/pypi/names): Package index to generate random names
 
 ### Reference of building this app
 To build this app, it was based on information from different components, such as:
