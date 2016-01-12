@@ -59,8 +59,7 @@ class Tournament(object):
             self._tournament_id = result[0]
             settings[0] = result[0]
         print settings
-        # range of competitors to define number of rounds acording to
-        # swiss-system 8
+        # range of competitors to define number of rounds acording to swiss-system 
         rang_ini = [3, 5,  9, 17, 33,  65, 128, 227]
         rang_fin = [4, 8, 16, 32, 64, 128, 226, 409]
         x, aux_round = 0, 2
@@ -85,8 +84,7 @@ class Tournament(object):
         must be shuffled for the first round. In order to support 
         multi-tournaments the players must be registered to the tournament.
         '''
-        if self._statusInit == False:
-            j = 1
+        if self._statusInit == False:            
             query = 'SELECT PLAYER_ID FROM PLAYERS_TOURNAMENT \
                      WHERE TOURNAMENT_ID=%s'
             data = (self._tournament_id,)
@@ -96,6 +94,7 @@ class Tournament(object):
                      WHERE PLAYER_ID=%s AND TOURNAMENT_ID=%s'
             # Each player registers to the tournament, according to the list 
             # randomly, it assigns a consecutive ranking since 1
+            j = 1
             for x in result:
                 data = (j, x[0], self._tournament_id)
                 self.conn_trnmt_db.dbStatementCommit(query, data)
@@ -164,7 +163,7 @@ class Tournament(object):
         '''Adds a player to the tournament database.
 
         The database assigns a unique serial id number for the player.  (This
-        should be handled by your SQL database schema, not in your Python code.)
+        is handled by the SQL database schema using ID_PLAYER_SEQUENCE.)
         Args:
           name: the player's full name (need not be unique).
         '''
