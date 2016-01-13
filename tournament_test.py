@@ -199,7 +199,7 @@ def testMatchesRandomly(pairings,id_round):
 
 if __name__ == '__main__':
     print " -----   STARTING SWISS-TOURNAMENT   -----"
-    #Define settings of the swiss_trnmnt, required for testTournamentMultiPlayers
+    #Define settings of the tournament, required for testTournamentMultiPlayers
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
     data=[1234,'swiss_trnmnt swissPairings','Mexico city','2015-12-01',
           '205-12-30',19]     
@@ -216,7 +216,7 @@ if __name__ == '__main__':
     reportMatches()
     testPairings()
     '''
-    # To test extended implementation (multi-players and multi-swiss_trnmnts) 
+    # To test extended implementation (multi-players and multi-tournaments) 
     # "comment methods for testing nanodegree program"
     
     testTournamentMultiPlayers()
