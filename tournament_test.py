@@ -134,8 +134,8 @@ def testTournamentMultiPlayers():
     id_round=1
     start_time = time.time()
     final_players= list()
-    print "Number of competitors [",swiss_trnmnt._competitors,"]"
-    for i in range(swiss_trnmnt._competitors):
+    print "Number of participants [",swiss_trnmnt._participants,"]"
+    for i in range(swiss_trnmnt._participants):
         # register players' name randomly using third-package names
         try:
             swiss_trnmnt.registerPlayer(names.get_full_name())
@@ -200,7 +200,7 @@ def testMatchesRandomly(pairings,id_round):
 if __name__ == '__main__':
     print " -----   STARTING SWISS-TOURNAMENT   -----"
     #Define settings of the tournament, required for testTournamentMultiPlayers
-    #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
+    #[tournmt_id,tournmt_name,location,date_start,date_end,number_participants]
     data=[1234,'swiss_trnmnt swissPairings','Mexico city','2015-12-01',
           '205-12-30',19]     
     swiss_trnmnt=tournament.Swiss()

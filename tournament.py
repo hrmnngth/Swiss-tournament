@@ -28,7 +28,7 @@ class Tournament(object):
         self._statusInit = False
         self._round = 0
         self._total_rounds = 0
-        self._competitors = 0
+        self._participants = 0
         self._rounds_single=0
         self._top_players=0
 
@@ -43,10 +43,10 @@ class Tournament(object):
         Args:
           data: (list) an structure of values for setting the tournament 
                 [id,tournament's name, tournament's place, date_start, date_end, 
-                number of competitors, winner (None), second place (None)]
+                number of participants, winner (None), second place (None)]
         '''
         self._tournament_id = settings[0]
-        self._competitors = settings[5]
+        self._participants = settings[5]
         query = 'SELECT COUNT(1) FROM TOURNAMENT WHERE TOURNAMENT_ID=%s'
         data = (self._tournament_id,)
         self.conn_trnmt_db._cursor.execute(query,data)
@@ -61,26 +61,26 @@ class Tournament(object):
             self._tournament_id = result[0]
             settings[0] = result[0]
         print settings
-        # range of competitors to define number of rounds acording to swiss-system 
+        # range of participants to define number of rounds acording to swiss-system 
         rang_ini = [3, 5,  9, 17, 33,  65, 128, 227]
         rang_fin = [4, 8, 16, 32, 64, 128, 226, 409]
         x, aux_round = 0, 2
         for i in rang_ini:
-            if self._competitors in xrange(i, rang_fin[x]+1):
+            if self._participants in xrange(i, rang_fin[x]+1):
                 self._total_rounds = aux_round
                 break
             aux_round += 1
             x += 1
-        if self._competitors > 409:
+        if self._participants > 409:
             self._total_rounds = 10
-        if self._competitors >= 8:
+        if self._participants >= 8:
             self._rounds_single = 3 
             self._top_players=8
         else:
             self._rounds_single = 2
             self._top_players=4    
         query = 'INSERT INTO TOURNAMENT (TOURNAMENT_ID, TOURNAMENT_NAME, \
-            TOURNAMENT_PLACE, START_DATE, END_DATE,NUMBER_COMPETITORS) \
+            TOURNAMENT_PLACE, START_DATE, END_DATE,NUMBER_PARTICIPANTS) \
             VALUES (%s,%s,%s,%s,%s,%s);'
         self.conn_trnmt_db.dbStatementCommit(query, settings)
         print 'Number of rounds to the Tournament [', self._total_rounds, ']'
@@ -88,7 +88,7 @@ class Tournament(object):
     def rankingInit(self):
         ''' Adds an initial ranking randomly for the first round by shuffling
 
-        According to Swiss-Style the competitors registered in the tournament
+        According to Swiss-Style the participants registered in the tournament
         must be shuffled for the first round. In order to support 
         multi-tournaments the players must be registered to the tournament.
         '''
@@ -299,7 +299,7 @@ class Swiss(Tournament):
 
     ''' Class extended from Tournament that implements the logic to create a 
         swiss tournament. It has methods to get pairings, to set a round bye
-        in case of odd competitors, and a method to break tied stands
+        in case of odd participants, and a method to break tied stands
     '''
 
     def __init__(self):
@@ -488,7 +488,7 @@ class Swiss(Tournament):
     def roundBye(self, player, round_):
         ''' Sets up a player-round-bye when there are an odd number of players
 
-        When the number of competitors is not an even number, according to 
+        When the number of participants is not an even number, according to 
         Swiss-Style Pairing rules it establishes after pairings are completed
         the player remaining receives a bye, equaling one match win.
 
