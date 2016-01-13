@@ -171,7 +171,6 @@ def testTournamentMultiPlayers():
             print rows[0],'\t',rows[1][:10],'\t',x
             x+=1    
     print '\n---Starting single-elimination tournament---'  
-    print   swiss_trnmnt._total_rounds,swiss_trnmnt._rounds_single
     while id_round <=swiss_trnmnt._total_rounds+swiss_trnmnt._rounds_single: # round's number for single is 3
         print "Round final=[",id_round,"]" 
         single= swiss_trnmnt.siglePairingElimination()        
@@ -203,7 +202,7 @@ if __name__ == '__main__':
     #Define settings of the swiss_trnmnt, required for testTournamentMultiPlayers
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
     data=[1234,'swiss_trnmnt swissPairings','Mexico city','2015-12-01',
-          '205-12-30',17]     
+          '205-12-30',19]     
     swiss_trnmnt=tournament.Swiss()
     swiss_trnmnt.setTournamentInfo(data)
 
