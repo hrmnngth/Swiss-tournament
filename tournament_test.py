@@ -154,18 +154,26 @@ def testTournamentMultiPlayers():
         print "Next match=",swiss,'\n'
         testMatchesRandomly(swiss,id_round) # establish winner of match randomly          
         id_round +=1
-    print '   Swiss swiss_trnmnt finished\n'
+    print '--- SWISS TOURNAMENT FINISHED ---\n'
     print '   Final Standings'
+    print ('ID\tNAME\t\tWINS')
+    print ('---------------------------')
     final_stands=swiss_trnmnt.playerStandings()
     for i in final_stands:
-        print i[0],'|',i[1][:10],'|',i[2] # it prints ID | NAME | WINS
+        print i[0],'\t',i[1][:13],'\t',i[2] # it prints ID | NAME | WINS
     final_players=swiss_trnmnt.topEightPlayers()
-    print (''' \nThe final 8 players using poinst-opponents for tie-break \
-(player_id,opponents' points):''')
-    print final_players,'\n'
-    print '---Starting single-elimination-swiss_trnmnt---'
-    while id_round <=swiss_trnmnt._total_rounds+3: # round's number for single is 3
-        print "Round final=[",id_round,"]"        
+    print (''' \nThe final TOP players using opponents-points for tie-break''')
+    print ('ID\tNAME\t    POSITION')
+    print ('---------------------------')
+    x=1    
+    for top8 in final_players:
+        for rows in top8:
+            print rows[0],'\t',rows[1][:10],'\t',x
+            x+=1    
+    print '\n---Starting single-elimination tournament---'  
+    print   swiss_trnmnt._total_rounds,swiss_trnmnt._rounds_single
+    while id_round <=swiss_trnmnt._total_rounds+swiss_trnmnt._rounds_single: # round's number for single is 3
+        print "Round final=[",id_round,"]" 
         single= swiss_trnmnt.siglePairingElimination()        
         print "Next match=",single, '\n'    
         testMatchesRandomly(single,id_round) # establish winner of match randomly
@@ -191,11 +199,11 @@ def testMatchesRandomly(pairings,id_round):
 
 
 if __name__ == '__main__':
-    print " ---Starting swiss_trnmnt---"
+    print " -----   STARTING SWISS-TOURNAMENT   -----"
     #Define settings of the swiss_trnmnt, required for testTournamentMultiPlayers
     #[tournmt_id,tournmt_name,location,date_start,date_end,number_competitors]
     data=[1234,'swiss_trnmnt swissPairings','Mexico city','2015-12-01',
-          '205-12-30',20]     
+          '205-12-30',17]     
     swiss_trnmnt=tournament.Swiss()
     swiss_trnmnt.setTournamentInfo(data)
 

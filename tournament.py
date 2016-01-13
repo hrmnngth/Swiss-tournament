@@ -29,6 +29,8 @@ class Tournament(object):
         self._round = 0
         self._total_rounds = 0
         self._competitors = 0
+        self._rounds_single=0
+        self._top_players=0
 
     def setTournamentInfo(self, settings):
         '''Define an id for the tournament,in order to support multi-tournaments
@@ -71,6 +73,12 @@ class Tournament(object):
             x += 1
         if self._competitors > 409:
             self._total_rounds = 10
+        if self._competitors >= 8:
+            self._rounds_single = 3 
+            self._top_players=8
+        else:
+            self._rounds_single = 2
+            self._top_players=4    
         query = 'INSERT INTO TOURNAMENT (TOURNAMENT_ID, TOURNAMENT_NAME, \
             TOURNAMENT_PLACE, START_DATE, END_DATE,NUMBER_COMPETITORS) \
             VALUES (%s,%s,%s,%s,%s,%s);'
@@ -225,7 +233,7 @@ class Tournament(object):
                 AND A.ROUND=%s AND B.RANK_FIN >0 AND B.RANK_FIN<=8 \
                 AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
                 AND B.TOURNAMENT_ID=C.TOURNAMENT_ID \
-                AND B.TOURNAMENT_ID=%s'
+                AND B.TOURNAMENT_ID=%s ORDER BY B.RANK_FIN'
             data = (self._round-1, self._tournament_id)
         result = self.conn_trnmt_db.dbQuery(query, data)
         len_res = len(result)
@@ -252,7 +260,7 @@ class Tournament(object):
         query = '''SELECT 'player_id' AS ID,WINNER ,'full_name' AS NAME, \
                 FULL_NAME FROM MATCHES A, PLAYERS B \
                 WHERE TOURNAMENT_ID=%s AND WINNER=PLAYER_ID AND ROUND=%s'''
-        data = (self._tournament_id, self._total_rounds+3)
+        data = (self._tournament_id, self._total_rounds+self._rounds_single)
         result = self.conn_trnmt_db.dbQuery(query, data)
         for i in result:
             result = list(i)
@@ -261,13 +269,12 @@ class Tournament(object):
         query = '''SELECT 'player_id' AS ID,loser ,'full_name' AS NAME, \
                 FULL_NAME FROM MATCHES A, PLAYERS B \
                 WHERE TOURNAMENT_ID=%s AND LOSER=PLAYER_ID AND ROUND=%s'''
-        data = (self._tournament_id, self._total_rounds+3)
+        data = (self._tournament_id, self._total_rounds+self._rounds_single)
         result = self.conn_trnmt_db.dbQuery(query, data)
         for i in result:
             result = list(i)
         it = iter(result)
         second_place = xmlTemplate % dict(zip(it, it))
-
         query = 'UPDATE TOURNAMENT SET WINNER=%s, SECOND_PLACE=%s \
                      WHERE TOURNAMENT_ID=%s'
         data = (winner, second_place, self._tournament_id)
@@ -275,7 +282,7 @@ class Tournament(object):
         root = ET.fromstring(winner)
         for elem in root.findall('player'):
             name_winner = elem.find('name').text
-        print 'The WINNER OF THE TOURNAMENT IS [', name_winner, ']'
+        print 'THE WINNER OF THE TOURNAMENT IS [', name_winner, ']'
         print '\n'
 
     def closeTournament(self):
@@ -332,11 +339,13 @@ class Swiss(Tournament):
             v_stndgs[w].append(player.Player(w, i, n, m))
         max_len_stnds = len(v_stndgs)
         count_keys = 1
-        print '--- Standings (id,name,wins) ---'
+        print '*****    Standings   *****'
+        print ('ID\tNAME\t\tWINS')
+        print ('---------------------------')
         players_bye = self.getPlayersBye(self._tournament_id)
         for k in v_stndgs.iterkeys():
             for w in v_stndgs[k]:
-                print w.getPlayerId(), '|', w.getName()[:10], '|', w.getWins()
+                print w.getPlayerId(), '\t', w.getName()[:13], '\t', w.getWins()
             pairings_tmp = list()
             alrdy_match = True
             match_with_bye = False
@@ -426,7 +435,7 @@ class Swiss(Tournament):
 
                 else:
                     # This block make pairing between last player of previous
-                    # key and it seeks a opponent base on priority
+                    # key, it seeks a opponent base on priority
                     oppnt_player = self.checkPlayersBye(
                         v_stndgs[k], players_bye)
                     val_rndm, match_with_bye = self.valOponent(
@@ -533,25 +542,26 @@ class Swiss(Tournament):
           sum_wins: (int) the number of wins that produce tied players
         '''
         # complex query statement to get opponents points of players with same
-        # wins. It selects the necessary players with highest points to complete        
-        # the top 8 ( check the last part of statement LIMIT %s)
+        # wins. It selects the necessary players with highest points opponents
+        # to complete The top 8 ( check the last part of statement LIMIT %s)
         # the second level to break tied players is players points
-        query = 'SELECT PLAYER, SUM(POINTS)TOT_POINTS FROM (\
-            SELECT WINNER AS PLAYER,PLAYER_ID,SUM(POINTS)AS POINTS \
+        query = 'SELECT PLAYER_TIED,FULL_NAME, SUM(POINTS_OP)TOT_POINTS_OP FROM (\
+            SELECT WINNER AS PLAYER_TIED,SUM(POINTS)AS POINTS_OP \
             FROM PLAYER_STANDINGS A, MATCHES B\
             WHERE WINNER IN(SELECT PLAYER_ID FROM PLAYER_STANDINGS \
             WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID ORDER BY POINTS DESC) \
             AND A.PLAYER_ID=B.LOSER AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
             AND A.TOURNAMENT_ID=%s GROUP BY WINNER,PLAYER_ID \
             UNION ALL \
-            SELECT LOSER,PLAYER_ID,SUM(POINTS) FROM PLAYER_STANDINGS A, \
+            SELECT LOSER,SUM(POINTS) FROM PLAYER_STANDINGS A, \
             MATCHES B \
             WHERE LOSER IN(SELECT PLAYER_ID FROM PLAYER_STANDINGS \
             WHERE WINS=%s AND TOURNAMENT_ID=A.TOURNAMENT_ID ORDER BY POINTS DESC) \
             AND A.PLAYER_ID=B.WINNER AND A.TOURNAMENT_ID=B.TOURNAMENT_ID \
-            AND A.TOURNAMENT_ID=%s GROUP BY LOSER,PLAYER_ID ORDER BY 1) C \
-            GROUP BY PLAYER ORDER BY TOT_POINTS DESC LIMIT %s'
-        limit_ = 8-int(sum_wins) # the rest of players necessary to complete the top 8
+            AND A.TOURNAMENT_ID=%s GROUP BY LOSER,PLAYER_ID ORDER BY 1) C, \
+            PLAYERS D WHERE C.PLAYER_TIED=D.PLAYER_ID \
+            GROUP BY C.PLAYER_TIED,D.FULL_NAME ORDER BY TOT_POINTS_OP DESC LIMIT %s'
+        limit_ = self._top_players-int(sum_wins) # the rest of players necessary to complete the top
         data = (wins_select[0], self._tournament_id, wins_select[0],
                 self._tournament_id, limit_)
         result = self.conn_trnmt_db.dbQuery(query, data)
@@ -574,16 +584,17 @@ class Swiss(Tournament):
         result = self.conn_trnmt_db.dbQuery(query, data)
         sum_wins = 0
         sum_aux = 0
-        final_players = list()
+        final_players = list()        
+        tie_break=False
         for rows in result:
             sum_wins = sum_wins+rows[1]
-            if sum_wins <= 8:
+            if sum_wins <= self._top_players:
                 final_players.append(
                     self.conn_trnmt_db.getFinalPlayers(
                         self._tournament_id, rows[0]))
                 sum_aux = sum_wins
             else:
-                final_players.append(self.tieBreakRule(rows, sum_aux))
+                final_players.append(self.tieBreakRule(rows, sum_aux))                    
                 break
         query = 'UPDATE PLAYERS_TOURNAMENT SET RANK_FIN=%s WHERE PLAYER_ID=%s \
                 AND TOURNAMENT_ID=%s'
@@ -613,7 +624,7 @@ class TournamentDb(object):
         '''Connect to the PostgreSQL database.Returns a database connection'''
 
         connection = psycopg2.connect(
-            'dbname=tournament user=vagrant password=')
+            'dbname=tournament')
         self._connection = connection
         self._cursor = connection.cursor()
         self.statusConnect = True

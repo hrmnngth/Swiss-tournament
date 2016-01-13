@@ -15,10 +15,10 @@ Swiss Tournament Application implements the Swiss tournament system supporting m
 1. This project works with vagrant machine that includes the follow components. Make sure you have installed vagrant properly at the same level of 'repo folder' or make sure that you have installed
 the following components in your computer.
 	- python2.7
-	- PostgresSQL
+	- PostgresSQL 9.3 or 9.4
 2. Install the follow components either vagrant machine or computer
 	- psycopg2: ``sudo apt-get install python-psycopg2`` Postgres database library 
-	- [names](https://pypi.python.org/pypi/names): Package index to generate random names 
+	- [names](https://pypi.python.org/pypi/names): Package index to generate random names
 
 ## Quick start
 
